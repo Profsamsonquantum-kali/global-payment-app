@@ -1050,7 +1050,52 @@
             </button>
         </div>
     </div>
-
+    <script>
+    // Google Login Handler
+    async function handleGoogleLogin() {
+        showLoading(true);
+        
+        try {
+            // Simulate Google login (in production, use real OAuth)
+            const mockGoogleUser = {
+                email: 'user' + Math.floor(Math.random() * 1000) + '@gmail.com',
+                name: 'Google User',
+                googleId: 'google_' + Date.now()
+            };
+            
+            const response = await fetch(`${API_URL}/auth/google`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(mockGoogleUser)
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.message || 'Google login failed');
+            }
+            
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+            
+            showToast('✅ Google login successful!', 'success');
+            
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1500);
+            
+        } catch (error) {
+            showToast(error.message, 'error');
+        } finally {
+            showLoading(false);
+        }
+    }
+    
+    // Attach to window for button click
+    window.googleLogin = handleGoogleLogin;
+    </script>
     <!-- Modal Container -->
     <div id="modal-container"></div>
 
@@ -1465,7 +1510,7 @@
                     </div>
                 </div>
             `;
-            
+                          
             document.getElementById('modal-container').innerHTML = modalHtml;
             document.getElementById('addMoneyModal').classList.add('active');
         }
