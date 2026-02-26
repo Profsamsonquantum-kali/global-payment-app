@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const dotenv = require('dotenv');
 
 dotenv.config();
@@ -10,29 +11,15 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ============================================
-// SIMPLE TEST ROUTES
-// ============================================
+// Serve static files from the frontend directory
+app.use(express.static(path.join(__dirname, '../frontend')));
 
-// Root route
-app.get('/', (req, res) => {
-    res.json({
-        name: 'Global Payment API',
-        version: '1.0.0',
-        status: 'running',
-        developer: 'Samson W Simiyu',
-        email: 'samsonwsimiyu@gmail.com',
-        endpoints: {
-            health: '/health',
-            test: '/api/test',
-            global: '/api/global/test',
-            countries: '/api/global/countries'
-        }
-    });
-});
+// ============================================
+// API ROUTES (prefix with /api)
+// ============================================
 
 // Health check
-app.get('/health', (req, res) => {
+app.get('/api/health', (req, res) => {
     res.json({
         status: 'OK',
         message: 'Server is running',
@@ -40,11 +27,7 @@ app.get('/health', (req, res) => {
     });
 });
 
-// ============================================
-// GLOBAL API ROUTES
-// ============================================
-
-// Test route
+// API test
 app.get('/api/test', (req, res) => {
     res.json({ 
         success: true, 
@@ -104,7 +87,7 @@ app.get('/api/global/exchange-rate', (req, res) => {
     });
 });
 
-// Global test route
+// Global API test
 app.get('/api/global/test', (req, res) => {
     res.json({ 
         success: true, 
@@ -117,16 +100,60 @@ app.get('/api/global/test', (req, res) => {
 });
 
 // ============================================
+// FRONTEND ROUTES
+// ============================================
+
+// Serve index.html for the root route
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/index.html'));
+});
+
+// Serve login page
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/login.html'));
+});
+
+// Serve register page
+app.get('/register', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/register.html'));
+});
+
+// Serve dashboard
+app.get('/dashboard', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/index.html'));
+});
+
+// Serve profile page
+app.get('/profile', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/profile.html'));
+});
+
+// Serve send page
+app.get('/send', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/send.html'));
+});
+
+// Serve global send page
+app.get('/global-send', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/global-send.html'));
+});
+
+// Serve transactions page
+app.get('/transactions', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/transactions.html'));
+});
+
+// ============================================
 // START SERVER
 // ============================================
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, '0.0.0.0', () => {
     console.log('='.repeat(50));
-    console.log('🚀 GLOBAL PAYMENT API');
+    console.log('🚀 GLOBAL PAYMENT APP');
     console.log('='.repeat(50));
     console.log(`✅ Server running on port ${PORT}`);
-    console.log(`📱 Health: http://localhost:${PORT}/health`);
-    console.log(`🌍 Test: http://localhost:${PORT}/api/test`);
+    console.log(`🌍 Frontend: http://localhost:${PORT}`);
+    console.log(`🔌 API: http://localhost:${PORT}/api/test`);
     console.log(`👨‍💻 Developer: Samson W Simiyu`);
     console.log(`📧 Email: samsonwsimiyu@gmail.com`);
     console.log('='.repeat(50));
