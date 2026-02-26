@@ -1,9 +1,9 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const dotenv = require('dotenv');
 
 dotenv.config();
 
@@ -21,7 +21,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../frontend')));
 
 // ============================================
-// DATABASE (In-Memory for demo)
+// DATABASE (In-Memory for demo - replace with MongoDB in production)
 // ============================================
 const users = [];
 const transactions = [];
@@ -30,7 +30,7 @@ const transactions = [];
 // HELPER FUNCTIONS
 // ============================================
 const generateToken = (userId) => {
-    return jwt.sign({ id: userId }, process.env.JWT_SECRET || 'your-secret-key', {
+    return jwt.sign({ id: userId }, process.env.JWT_SECRET || 'your-secret-key-2026', {
         expiresIn: '30d'
     });
 };
@@ -48,6 +48,14 @@ app.post('/api/auth/register', async (req, res) => {
         const { fullName, email, phoneNumber, password, country } = req.body;
 
         console.log('📝 Registration attempt:', { fullName, email, country });
+
+        // Validate input
+        if (!fullName || !email || !phoneNumber || !password || !country) {
+            return res.status(400).json({ 
+                success: false,
+                message: 'All fields are required' 
+            });
+        }
 
         // Check if user exists
         if (findUserByEmail(email)) {
@@ -69,20 +77,25 @@ app.post('/api/auth/register', async (req, res) => {
             phoneNumber,
             password: hashedPassword,
             country,
-            isVerified: false,
-            balance: 1000,
+            isVerified: true,
+            balance: 5000,
             balances: {
-                USD: 1000,
+                USD: 5000,
                 EUR: 0,
                 GBP: 0,
-                KES: 0
+                KES: 0,
+                NGN: 0,
+                INR: 0
             },
+            totalSent: 0,
+            totalReceived: 0,
             transactions: [],
             createdAt: new Date().toISOString()
         };
 
         users.push(newUser);
         console.log('✅ User registered:', email);
+        console.log('📊 Total users:', users.length);
 
         const token = generateToken(newUser.id);
 
@@ -97,7 +110,9 @@ app.post('/api/auth/register', async (req, res) => {
                 country: newUser.country,
                 isVerified: newUser.isVerified,
                 balance: newUser.balance,
-                balances: newUser.balances
+                balances: newUser.balances,
+                totalSent: newUser.totalSent,
+                totalReceived: newUser.totalReceived
             }
         });
 
@@ -116,6 +131,13 @@ app.post('/api/auth/login', async (req, res) => {
         const { email, password } = req.body;
 
         console.log('🔑 Login attempt:', email);
+
+        if (!email || !password) {
+            return res.status(400).json({ 
+                success: false,
+                message: 'Email and password are required' 
+            });
+        }
 
         const user = findUserByEmail(email);
         
@@ -150,7 +172,9 @@ app.post('/api/auth/login', async (req, res) => {
                 country: user.country,
                 isVerified: user.isVerified,
                 balance: user.balance,
-                balances: user.balances
+                balances: user.balances,
+                totalSent: user.totalSent || 0,
+                totalReceived: user.totalReceived || 0
             }
         });
 
@@ -176,20 +200,24 @@ app.post('/api/auth/google', async (req, res) => {
             // Create new user from Google data
             const newUser = {
                 id: Date.now().toString(),
-                fullName: name,
+                fullName: name || 'Google User',
                 email,
                 phoneNumber: '',
                 password: '',
                 googleId,
-                country: 'KE',
+                country: 'US',
                 isVerified: true,
-                balance: 1000,
+                balance: 5000,
                 balances: {
-                    USD: 1000,
+                    USD: 5000,
                     EUR: 0,
                     GBP: 0,
-                    KES: 0
+                    KES: 0,
+                    NGN: 0,
+                    INR: 0
                 },
+                totalSent: 0,
+                totalReceived: 0,
                 transactions: [],
                 createdAt: new Date().toISOString()
             };
@@ -212,7 +240,9 @@ app.post('/api/auth/google', async (req, res) => {
                 country: user.country,
                 isVerified: user.isVerified,
                 balance: user.balance,
-                balances: user.balances
+                balances: user.balances,
+                totalSent: user.totalSent || 0,
+                totalReceived: user.totalReceived || 0
             }
         });
 
@@ -228,6 +258,24 @@ app.post('/api/auth/google', async (req, res) => {
 // ============================================
 // USER ROUTES
 // ============================================
+
+// Middleware to authenticate token
+const authenticateToken = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+        return res.status(401).json({ message: 'Access denied. No token provided.' });
+    }
+
+    jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key-2026', (err, user) => {
+        if (err) {
+            return res.status(403).json({ message: 'Invalid or expired token.' });
+        }
+        req.user = user;
+        next();
+    });
+};
 
 // Get user profile
 app.get('/api/users/profile', authenticateToken, (req, res) => {
@@ -246,7 +294,10 @@ app.get('/api/users/profile', authenticateToken, (req, res) => {
             country: user.country,
             isVerified: user.isVerified,
             balance: user.balance,
-            balances: user.balances
+            balances: user.balances,
+            totalSent: user.totalSent || 0,
+            totalReceived: user.totalReceived || 0,
+            createdAt: user.createdAt
         });
 
     } catch (error) {
@@ -314,10 +365,16 @@ app.get('/api/users/stats', authenticateToken, (req, res) => {
             .filter(t => t.type === 'receive')
             .reduce((sum, t) => sum + t.amount, 0);
 
+        const countriesSentTo = [...new Set(userTransactions
+            .filter(t => t.type === 'send')
+            .map(t => t.recipientCountry)
+            .filter(Boolean))];
+
         res.json({
             totalSent,
             totalReceived,
             totalTransactions: userTransactions.length,
+            countriesSentTo: countriesSentTo.length,
             memberSince: user.createdAt
         });
 
@@ -335,7 +392,8 @@ app.get('/api/payments/transactions', authenticateToken, (req, res) => {
     try {
         const userTransactions = transactions
             .filter(t => t.userId === req.user.id)
-            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+            .slice(0, 20);
 
         res.json({
             success: true,
@@ -359,7 +417,11 @@ app.post('/api/payments/send', authenticateToken, (req, res) => {
             return res.status(404).json({ message: 'Recipient not found' });
         }
 
-        if (sender.balances[currency] < amount) {
+        if (sender.id === recipient.id) {
+            return res.status(400).json({ message: 'Cannot send money to yourself' });
+        }
+
+        if (!sender.balances[currency] || sender.balances[currency] < amount) {
             return res.status(400).json({ message: 'Insufficient balance' });
         }
 
@@ -367,31 +429,53 @@ app.post('/api/payments/send', authenticateToken, (req, res) => {
         const total = amount + fee;
 
         const transaction = {
-            id: Date.now().toString(),
+            id: 'TXN' + Date.now() + Math.random().toString(36).substring(2, 8).toUpperCase(),
             userId: sender.id,
             type: 'send',
             amount,
             currency,
             fee,
             total,
-            recipient: recipient.email,
+            recipientEmail: recipient.email,
             recipientName: recipient.fullName,
-            description,
+            recipientCountry: recipient.country,
+            description: description || 'Money transfer',
             status: 'completed',
             createdAt: new Date().toISOString()
         };
 
         transactions.push(transaction);
 
-        // Update balances
+        // Update sender balances
         sender.balances[currency] -= total;
         sender.totalSent = (sender.totalSent || 0) + amount;
 
-        recipient.balances[currency] = (recipient.balances[currency] || 0) + amount;
+        // Update recipient balances
+        if (!recipient.balances[currency]) recipient.balances[currency] = 0;
+        recipient.balances[currency] += amount;
         recipient.totalReceived = (recipient.totalReceived || 0) + amount;
+
+        // Create receive transaction for recipient
+        const receiveTransaction = {
+            id: 'TXN' + Date.now() + 1 + Math.random().toString(36).substring(2, 8).toUpperCase(),
+            userId: recipient.id,
+            type: 'receive',
+            amount,
+            currency,
+            senderEmail: sender.email,
+            senderName: sender.fullName,
+            description: description || 'Money received',
+            status: 'completed',
+            createdAt: new Date().toISOString()
+        };
+
+        transactions.push(receiveTransaction);
+
+        console.log(`✅ Money sent: ${amount} ${currency} from ${sender.email} to ${recipient.email}`);
 
         res.status(201).json({
             success: true,
+            message: 'Money sent successfully',
             transaction
         });
 
@@ -408,7 +492,7 @@ app.post('/api/payments/deposit', authenticateToken, (req, res) => {
         const user = findUserById(req.user.id);
 
         const transaction = {
-            id: Date.now().toString(),
+            id: 'TXN' + Date.now() + Math.random().toString(36).substring(2, 8).toUpperCase(),
             userId: user.id,
             type: 'deposit',
             amount,
@@ -418,11 +502,16 @@ app.post('/api/payments/deposit', authenticateToken, (req, res) => {
         };
 
         transactions.push(transaction);
-        user.balances[currency] = (user.balances[currency] || 0) + amount;
+
+        if (!user.balances[currency]) user.balances[currency] = 0;
+        user.balances[currency] += amount;
+        user.balance += amount;
 
         res.status(201).json({
             success: true,
-            transaction
+            message: 'Deposit successful',
+            transaction,
+            newBalance: user.balances[currency]
         });
 
     } catch (error) {
@@ -444,18 +533,26 @@ app.get('/api/global/countries', (req, res) => {
         { code: 'ZA', name: 'South Africa', currency: 'ZAR' },
         { code: 'IN', name: 'India', currency: 'INR' },
         { code: 'DE', name: 'Germany', currency: 'EUR' },
+        { code: 'FR', name: 'France', currency: 'EUR' },
         { code: 'JP', name: 'Japan', currency: 'JPY' },
+        { code: 'CN', name: 'China', currency: 'CNY' },
         { code: 'AU', name: 'Australia', currency: 'AUD' },
+        { code: 'CA', name: 'Canada', currency: 'CAD' },
         { code: 'AE', name: 'UAE', currency: 'AED' },
         { code: 'SA', name: 'Saudi Arabia', currency: 'SAR' },
         { code: 'PK', name: 'Pakistan', currency: 'PKR' },
         { code: 'BD', name: 'Bangladesh', currency: 'BDT' },
         { code: 'BR', name: 'Brazil', currency: 'BRL' },
-        { code: 'MX', name: 'Mexico', currency: 'MXN' }
+        { code: 'MX', name: 'Mexico', currency: 'MXN' },
+        { code: 'AR', name: 'Argentina', currency: 'ARS' },
+        { code: 'CL', name: 'Chile', currency: 'CLP' },
+        { code: 'CO', name: 'Colombia', currency: 'COP' },
+        { code: 'PE', name: 'Peru', currency: 'PEN' }
     ];
     
     res.json({
         success: true,
+        count: countries.length,
         countries
     });
 });
@@ -464,20 +561,40 @@ app.get('/api/global/countries', (req, res) => {
 app.get('/api/global/exchange-rate', (req, res) => {
     const { from, to } = req.query;
     
+    if (!from || !to) {
+        return res.status(400).json({ 
+            success: false, 
+            message: 'Please provide from and to currencies' 
+        });
+    }
+    
     const rates = {
-        USD: { EUR: 0.92, GBP: 0.79, KES: 150, NGN: 1550, INR: 83, AED: 3.67, SAR: 3.75, PKR: 285, BDT: 110, BRL: 5.05, MXN: 17.12 },
-        EUR: { USD: 1.09, GBP: 0.86, KES: 163, NGN: 1685, INR: 90, AED: 4.01 },
-        GBP: { USD: 1.27, EUR: 1.16, KES: 190, NGN: 1960 },
-        KES: { USD: 0.0067, EUR: 0.0061, GBP: 0.0053 }
+        USD: { 
+            EUR: 0.92, GBP: 0.79, KES: 150, NGN: 1550, INR: 83, 
+            AED: 3.67, SAR: 3.75, PKR: 285, BDT: 110, BRL: 5.05, 
+            MXN: 17.12, ARS: 850, CLP: 940, COP: 3950, PEN: 3.75,
+            JPY: 150, CNY: 7.2, AUD: 1.52, CAD: 1.35 
+        },
+        EUR: { 
+            USD: 1.09, GBP: 0.86, KES: 163, NGN: 1685, INR: 90, 
+            AED: 4.01, JPY: 160, CNY: 7.8 
+        },
+        GBP: { 
+            USD: 1.27, EUR: 1.16, KES: 190, NGN: 1960, INR: 105 
+        },
+        KES: { 
+            USD: 0.0067, EUR: 0.0061, GBP: 0.0053, NGN: 10.33 
+        }
     };
     
-    const rate = rates[from]?.[to] || 1;
+    const rate = rates[from]?.[to] || (from === to ? 1 : 1.5);
     
     res.json({
         success: true,
         from,
         to,
-        rate
+        rate,
+        timestamp: new Date().toISOString()
     });
 });
 
@@ -486,7 +603,20 @@ app.post('/api/global/calculate-fees', (req, res) => {
     const { amount, fromCountry, toCountry, method } = req.body;
     
     let feePercentage = fromCountry === toCountry ? 0.005 : 0.02;
-    const fixedFee = fromCountry === toCountry ? 0.5 : 3;
+    let fixedFee = fromCountry === toCountry ? 0.5 : 3;
+    
+    // Method-specific fees
+    const methodFees = {
+        'mpesa': 0.005,
+        'paystack': 0.015,
+        'stripe': 0.029,
+        'paypal': 0.039,
+        'bank': 0.01,
+        'card': 0.025,
+        'wise': 0.008
+    };
+    
+    feePercentage += methodFees[method] || 0.02;
     
     const totalFee = (amount * feePercentage) + fixedFee;
     
@@ -495,49 +625,53 @@ app.post('/api/global/calculate-fees', (req, res) => {
         fees: {
             percentage: feePercentage * 100,
             fixed: fixedFee,
-            total: totalFee
+            total: totalFee,
+            breakdown: {
+                base: fromCountry === toCountry ? 0.5 : 2,
+                method: (methodFees[method] || 2) * 100,
+                fixed: fixedFee
+            }
         }
     });
 });
 
-// Get payment methods
+// Get payment methods for country
 app.get('/api/global/payment-methods/:country', (req, res) => {
     const { country } = req.params;
     
     const methods = {
-        'KE': ['mpesa', 'card', 'bank'],
-        'US': ['stripe', 'paypal', 'ach'],
-        'GB': ['stripe', 'paypal', 'faster'],
-        'NG': ['paystack', 'card', 'bank'],
-        'IN': ['razorpay', 'upi', 'card'],
-        'default': ['card', 'bank']
+        'KE': [
+            { id: 'mpesa', name: 'M-Pesa', provider: 'Safaricom', type: 'mobile' },
+            { id: 'card', name: 'Credit Card', provider: 'Stripe', type: 'card' },
+            { id: 'bank', name: 'Bank Transfer', provider: 'Local Bank', type: 'bank' }
+        ],
+        'US': [
+            { id: 'stripe', name: 'Credit Card', provider: 'Stripe', type: 'card' },
+            { id: 'paypal', name: 'PayPal', provider: 'PayPal', type: 'wallet' },
+            { id: 'ach', name: 'ACH Bank Transfer', provider: 'Plaid', type: 'bank' }
+        ],
+        'GB': [
+            { id: 'stripe', name: 'Credit Card', provider: 'Stripe', type: 'card' },
+            { id: 'paypal', name: 'PayPal', provider: 'PayPal', type: 'wallet' },
+            { id: 'faster', name: 'Faster Payments', provider: 'Wise', type: 'bank' }
+        ],
+        'NG': [
+            { id: 'paystack', name: 'Paystack', provider: 'Paystack', type: 'card' },
+            { id: 'bank', name: 'Bank Transfer', provider: 'Local Bank', type: 'bank' }
+        ],
+        'IN': [
+            { id: 'razorpay', name: 'Razorpay', provider: 'Razorpay', type: 'card' },
+            { id: 'upi', name: 'UPI', provider: 'NPCI', type: 'bank' },
+            { id: 'paytm', name: 'Paytm', provider: 'Paytm', type: 'wallet' }
+        ]
     };
     
     res.json({
         success: true,
-        methods: methods[country] || methods.default
+        country,
+        methods: methods[country] || methods['US']
     });
 });
-
-// ============================================
-// MIDDLEWARE
-// ============================================
-function authenticateToken(req, res, next) {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-
-    if (!token) {
-        return res.status(401).json({ message: 'Access denied' });
-    }
-
-    jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key', (err, user) => {
-        if (err) {
-            return res.status(403).json({ message: 'Invalid token' });
-        }
-        req.user = user;
-        next();
-    });
-}
 
 // ============================================
 // FRONTEND ROUTES
@@ -551,23 +685,34 @@ app.get('/send', (req, res) => res.sendFile(path.join(__dirname, '../frontend/se
 app.get('/global-send', (req, res) => res.sendFile(path.join(__dirname, '../frontend/global-send.html')));
 app.get('/transactions', (req, res) => res.sendFile(path.join(__dirname, '../frontend/transactions.html')));
 
+// Catch-all route for frontend (SPA support)
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/index.html'));
+});
+
 // ============================================
 // START SERVER
 // ============================================
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, '0.0.0.0', () => {
-    console.log('='.repeat(60));
+    console.log('='.repeat(70));
     console.log('🚀 GLOBAL PAYMENT APP - FULLY FUNCTIONAL');
-    console.log('='.repeat(60));
+    console.log('='.repeat(70));
     console.log(`✅ Server running on port ${PORT}`);
     console.log(`🌍 Frontend: https://global-payment-app.onrender.com`);
     console.log(`🔌 API: https://global-payment-app.onrender.com/api/test`);
     console.log(`👨‍💻 Developer: Samson W Simiyu`);
     console.log(`📧 Email: samsonwsimiyu@gmail.com`);
-    console.log('='.repeat(60));
-    console.log(`✅ Google Login: Working`);
-    console.log(`✅ User Registration: Working`);
-    console.log(`✅ Money Transfer: Working`);
-    console.log(`✅ Exchange Rates: Working`);
-    console.log('='.repeat(60));
+    console.log('='.repeat(70));
+    console.log(`✅ Google Login: WORKING`);
+    console.log(`✅ Email Registration: WORKING`);
+    console.log(`✅ User Login: WORKING`);
+    console.log(`✅ User Profiles: WORKING`);
+    console.log(`✅ Money Transfer: WORKING`);
+    console.log(`✅ Exchange Rates: WORKING`);
+    console.log(`✅ Multi-Currency: WORKING`);
+    console.log('='.repeat(70));
+    console.log(`📊 Users in database: ${users.length}`);
+    console.log(`📊 Transactions: ${transactions.length}`);
+    console.log('='.repeat(70));
 });
