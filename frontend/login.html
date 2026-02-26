@@ -494,7 +494,7 @@
             if (hostname === 'localhost' || hostname === '127.0.0.1') {
                 return 'http://localhost:5000/api';
             }
-            return 'https://unipay-pro-api.onrender.com/api';
+            return `${window.location.protocol}//${window.location.hostname}/api`;
         })();
 
         // Check if already logged in

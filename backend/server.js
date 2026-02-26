@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const dotenv = require('dotenv');
+const users = [];
 
 dotenv.config();
 
@@ -98,6 +99,140 @@ app.get('/api/global/test', (req, res) => {
         ]
     });
 });
+// ============================================
+// MOCK AUTH API (for testing)
+// ============================================
+
+// Mock users database (in memory)
+
+// Register
+app.post('/api/auth/register', (req, res) => {
+    try {
+        const { fullName, email, phoneNumber, password, country } = req.body;
+        
+        console.log('Registration attempt:', { fullName, email, country });
+        
+        // Check if user exists
+        const existingUser = users.find(u => u.email === email || u.phoneNumber === phoneNumber);
+        if (existingUser) {
+            return res.status(400).json({ 
+                success: false,
+                message: 'User already exists' 
+            });
+        }
+        
+        // Create new user
+        const newUser = {
+            id: Date.now().toString(),
+            fullName,
+            email,
+            phoneNumber,
+            password, // In production, hash this!
+            country,
+            balance: 1000,
+            balances: {
+                USD: 1000,
+                EUR: 0,
+                GBP: 0,
+                KES: 0
+            },
+            createdAt: new Date().toISOString()
+        };
+        
+        users.push(newUser);
+        
+        // Create token (simple mock token)
+        const token = 'mock_jwt_token_' + Date.now();
+        
+        res.status(201).json({
+            success: true,
+            token,
+            user: {
+                id: newUser.id,
+                fullName: newUser.fullName,
+                email: newUser.email,
+                phoneNumber: newUser.phoneNumber,
+                country: newUser.country,
+                balance: newUser.balance,
+                balances: newUser.balances
+            }
+        });
+        
+    } catch (error) {
+        console.error('Registration error:', error);
+        res.status(500).json({ 
+            success: false,
+            message: 'Server error during registration' 
+        });
+    }
+});
+
+// Login
+app.post('/api/auth/login', (req, res) => {
+    try {
+        const { email, password } = req.body;
+        
+        console.log('Login attempt:', email);
+        
+        // Find user
+        const user = users.find(u => u.email === email && u.password === password);
+        
+        if (!user) {
+            return res.status(401).json({ 
+                success: false,
+                message: 'Invalid credentials' 
+            });
+        }
+        
+        const token = 'mock_jwt_token_' + Date.now();
+        
+        res.json({
+            success: true,
+            token,
+            user: {
+                id: user.id,
+                fullName: user.fullName,
+                email: user.email,
+                phoneNumber: user.phoneNumber,
+                country: user.country,
+                balance: user.balance,
+                balances: user.balances
+            }
+        });
+        
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).json({ 
+            success: false,
+            message: 'Server error during login' 
+        });
+    }
+});
+
+// Get user profile (protected route example)
+app.get('/api/users/profile', (req, res) => {
+    // Get token from header
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        return res.status(401).json({ message: 'No token provided' });
+    }
+    
+    // Mock response
+    res.json({
+        id: '123',
+        fullName: 'Test User',
+        email: 'test@example.com',
+        phoneNumber: '+1234567890',
+        country: 'KE',
+        balance: 1000,
+        balances: {
+            USD: 1000,
+            EUR: 0,
+            GBP: 0,
+            KES: 0
+        }
+    });
+});
 
 // ============================================
 // FRONTEND ROUTES
@@ -157,4 +292,139 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`👨‍💻 Developer: Samson W Simiyu`);
     console.log(`📧 Email: samsonwsimiyu@gmail.com`);
     console.log('='.repeat(50));
+});
+
+// ============================================
+// AUTH API ROUTES
+// ============================================
+
+// Mock users database (in memory)
+const users = [];
+
+// Register
+app.post('/api/auth/register', (req, res) => {
+    try {
+        const { fullName, email, phoneNumber, password, country } = req.body;
+        
+        console.log('Registration attempt:', { fullName, email, country });
+        
+        // Check if user exists
+        const existingUser = users.find(u => u.email === email || u.phoneNumber === phoneNumber);
+        if (existingUser) {
+            return res.status(400).json({ 
+                success: false,
+                message: 'User already exists' 
+            });
+        }
+        
+        // Create new user
+        const newUser = {
+            id: Date.now().toString(),
+            fullName,
+            email,
+            phoneNumber,
+            password,
+            country,
+            balance: 1000,
+            balances: {
+                USD: 1000,
+                EUR: 0,
+                GBP: 0,
+                KES: 0
+            },
+            createdAt: new Date().toISOString()
+        };
+        
+        users.push(newUser);
+        
+        // Create token
+        const token = 'mock_jwt_token_' + Date.now();
+        
+        res.status(201).json({
+            success: true,
+            token,
+            user: {
+                id: newUser.id,
+                fullName: newUser.fullName,
+                email: newUser.email,
+                phoneNumber: newUser.phoneNumber,
+                country: newUser.country,
+                balance: newUser.balance,
+                balances: newUser.balances
+            }
+        });
+        
+    } catch (error) {
+        console.error('Registration error:', error);
+        res.status(500).json({ 
+            success: false,
+            message: 'Server error during registration' 
+        });
+    }
+});
+
+// Login
+app.post('/api/auth/login', (req, res) => {
+    try {
+        const { email, password } = req.body;
+        
+        console.log('Login attempt:', email);
+        
+        // Find user
+        const user = users.find(u => u.email === email && u.password === password);
+        
+        if (!user) {
+            return res.status(401).json({ 
+                success: false,
+                message: 'Invalid credentials' 
+            });
+        }
+        
+        const token = 'mock_jwt_token_' + Date.now();
+        
+        res.json({
+            success: true,
+            token,
+            user: {
+                id: user.id,
+                fullName: user.fullName,
+                email: user.email,
+                phoneNumber: user.phoneNumber,
+                country: user.country,
+                balance: user.balance,
+                balances: user.balances
+            }
+        });
+        
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).json({ 
+            success: false,
+            message: 'Server error during login' 
+        });
+    }
+});
+
+// Get user profile
+app.get('/api/users/profile', (req, res) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        return res.status(401).json({ message: 'No token provided' });
+    }
+    
+    // Mock response
+    res.json({
+        id: '123',
+        fullName: 'Test User',
+        email: 'test@example.com',
+        phoneNumber: '+1234567890',
+        country: 'KE',
+        balance: 1000,
+        balances: {
+            USD: 1000,
+            EUR: 0,
+            GBP: 0,
+            KES: 0
+        }
+    });
 });
