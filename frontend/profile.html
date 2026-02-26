@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unipay Pro - Profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .profile-header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: var(--spacing-xl);
+            border-radius: var(--radius-xxl);
+            text-align: center;
+            margin-bottom: var(--spacing-xl);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto var(--spacing-md);
+            font-size: 48px;
+            border: 4px solid white;
+        }
+        
+        .profile-name {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .profile-email {
+            opacity: 0.9;
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .profile-badge {
+            display: inline-block;
+            padding: var(--spacing-xs) var(--spacing-md);
+            background: rgba(255,255,255,0.2);
+            border-radius: var(--radius-full);
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .profile-section {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-lg);
+            padding-bottom: var(--spacing-md);
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        .section-title h3 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .info-row {
+            display: flex;
+            margin-bottom: var(--spacing-md);
+            padding-bottom: var(--spacing-md);
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        .info-label {
+            width: 120px;
+            color: var(--gray);
+            font-size: 14px;
+        }
+        
+        .info-value {
+            flex: 1;
+            font-weight: 500;
+        }
+        
+        .verification-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--spacing-md);
+            background: var(--lighter);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .verification-status {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+        
+        .status-verified {
+            color: var(--success);
+        }
+        
+        .status-pending {
+            color: var(--warning);
+        }
+        
+        .security-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--spacing-md);
+            background: var(--lighter);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: var(--success);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        .device-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            padding: var(--spacing-md);
+            background: var(--lighter);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .device-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-primary);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .device-info {
+            flex: 1;
+        }
+        
+        .device-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .device-meta {
+            font-size: 12px;
+            color: var(--gray);
+        }
+        
+        .danger-zone {
+            border: 2px solid var(--danger);
+        }
+        
+        .danger-zone .section-title {
+            color: var(--danger);
+        }
+        
+        @media (max-width: 768px) {
+            .info-row {
+                flex-direction: column;
+                gap: var(--spacing-xs);
+            }
+            
+            .info-label {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="global-loader" class="loader-overlay" style="display: none;">
+        <div class="loader"></div>
+    </div>
+
+    <div class="container" style="max-width: 800px; padding: 20px 0 80px;">
+        <!-- Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h1 style="color: white;">My Profile</h1>
+            <button class="btn btn-secondary" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i> Back
+            </button>
+        </div>
+        
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="profile-avatar">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="profile-name" id="profile-name">Loading...</div>
+            <div class="profile-email" id="profile-email">Loading...</div>
+            <span class="profile-badge" id="profile-badge">Basic Account</span>
+        </div>
+        
+        <!-- Personal Information -->
+        <div class="profile-section">
+            <div class="section-title">
+                <h3>Personal Information</h3>
+                <button class="btn btn-sm btn-outline" onclick="editPersonalInfo()">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+            </div>
+            
+            <div class="info-row">
+                <div class="info-label">Full Name</div>
+                <div class="info-value" id="display-fullname">-</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Email</div>
+                <div class="info-value" id="display-email">-</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Phone</div>
+                <div class="info-value" id="display-phone">-</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Country</div>
+                <div class="info-value" id="display-country">-</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Member Since</div>
+                <div class="info-value" id="display-joined">-</div>
+            </div>
+        </div>
+        
+        <!-- Verification Status -->
+        <div class="profile-section">
+            <div class="section-title">
+                <h3>Verification Status</h3>
+                <button class="btn btn-sm btn-primary" onclick="startVerification()">
+                    Verify Now
+                </button>
+            </div>
+            
+            <div class="verification-item">
+                <span>Email Verification</span>
+                <div class="verification-status">
+                    <span id="email-verified" class="status-verified">✓ Verified</span>
+                </div>
+            </div>
+            
+            <div class="verification-item">
+                <span>Phone Verification</span>
+                <div class="verification-status">
+                    <span id="phone-verified" class="status-pending">⏳ Pending</span>
+                </div>
+            </div>
+            
+            <div class="verification-item">
+                <span>Identity Verification</span>
+                <div class="verification-status">
+                    <span id="id-verified" class="status-pending">⏳ Pending</span>
+                </div>
+            </div>
+            
+            <div class="verification-item">
+                <span>Address Verification</span>
+                <div class="verification-status">
+                    <span id="address-verified" class="status-pending">⏳ Pending</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Security Settings -->
+        <div class="profile-section">
+            <div class="section-title">
+                <h3>Security</h3>
+            </div>
+            
+            <div class="security-item">
+                <div>
+                    <strong>Two-Factor Authentication</strong>
+                    <p style="font-size: 12px; color: var(--gray);">Add extra security to your account</p>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="twofa-toggle" onchange="toggle2FA()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <div class="security-item">
+                <div>
+                    <strong>Change Password</strong>
+                    <p style="font-size: 12px; color: var(--gray);">Update your password regularly</p>
+                </div>
+                <button class="btn btn-sm btn-primary" onclick="changePassword()">
+                    Change
+                </button>
+            </div>
+        </div>
+        
+        <!-- Trusted Devices -->
+        <div class="profile-section">
+            <div class="section-title">
+                <h3>Trusted Devices</h3>
+            </div>
+            
+            <div id="devices-list">
+                <div class="device-item">
+                    <div class="device-icon">
+                        <i class="fas fa-laptop"></i>
+                    </div>
+                    <div class="device-info">
+                        <div class="device-name">Chrome on Windows</div>
+                        <div class="device-meta">Last active: Just now • IP: 192.168.1.1</div>
+                    </div>
+                    <button class="btn btn-sm btn-danger" onclick="removeDevice(this)">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+                
+                <div class="device-item">
+                    <div class="device-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <div class="device-info">
+                        <div class="device-name">Safari on iPhone</div>
+                        <div class="device-meta">Last active: 2 days ago • IP: 192.168.1.2</div>
+                    </div>
+                    <button class="btn btn-sm btn-danger" onclick="removeDevice(this)">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Danger Zone -->
+        <div class="profile-section danger-zone">
+            <div class="section-title">
+                <h3>Danger Zone</h3>
+            </div>
+            
+            <div class="security-item">
+                <div>
+                    <strong>Delete Account</strong>
+                    <p style="font-size: 12px; color: var(--gray);">Permanently delete your account and all data</p>
+                </div>
+                <button class="btn btn-sm btn-danger" onclick="deleteAccount()">
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div class="modal-overlay" id="editProfileModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Profile</h2>
+                <button class="modal-close" onclick="closeModal('editProfileModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form onsubmit="saveProfile(event)">
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" class="form-control" id="edit-fullname" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Phone Number</label>
+                        <input type="tel" class="form-control" id="edit-phone" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Country</label>
+                        <select class="form-control" id="edit-country">
+                            <option value="US">United States</option>
+                            <option value="GB">United Kingdom</option>
+                            <option value="KE">Kenya</option>
+                            <option value="NG">Nigeria</option>
+                            <option value="ZA">South Africa</option>
+                            <option value="IN">India</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary btn-block">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div class="modal-overlay" id="changePasswordModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Change Password</h2>
+                <button class="modal-close" onclick="closeModal('changePasswordModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form onsubmit="updatePassword(event)">
+                    <div class="form-group">
+                        <label class="form-label">Current Password</label>
+                        <input type="password" class="form-control" id="current-password" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">New Password</label>
+                        <input type="password" class="form-control" id="new-password" required>
+                        <div class="form-text">Minimum 6 characters</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Confirm New Password</label>
+                        <input type="password" class="form-control" id="confirm-password" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary btn-block">Update Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast"></div>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', loadProfile);
+        
+        async function loadProfile() {
+            showLoading(true);
+            
+            try {
+                const response = await fetch(`${CONFIG.API_URL}/users/profile`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                
+                if (!response.ok) throw new Error('Failed to load profile');
+                
+                const user = await response.json();
+                displayProfile(user);
+                
+            } catch (error) {
+                showToast(error.message, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        function displayProfile(user) {
+            document.getElementById('profile-name').textContent = user.fullName;
+            document.getElementById('profile-email').textContent = user.email;
+            
+            document.getElementById('display-fullname').textContent = user.fullName;
+            document.getElementById('display-email').textContent = user.email;
+            document.getElementById('display-phone').textContent = user.phoneNumber || 'Not set';
+            document.getElementById('display-country').textContent = getCountryName(user.country) || 'Not set';
+            document.getElementById('display-joined').textContent = formatDate(user.createdAt);
+            
+            document.getElementById('email-verified').innerHTML = user.isVerified ? 
+                '<span class="status-verified">✓ Verified</span>' : 
+                '<span class="status-pending">⏳ Pending</span>';
+            
+            document.getElementById('twofa-toggle').checked = user.twoFactorEnabled || false;
+            
+            // Populate edit form
+            document.getElementById('edit-fullname').value = user.fullName;
+            document.getElementById('edit-phone').value = user.phoneNumber || '';
+            document.getElementById('edit-country').value = user.country || 'KE';
+        }
+        
+        function getCountryName(code) {
+            const countries = {
+                'US': 'United States',
+                'GB': 'United Kingdom',
+                'KE': 'Kenya',
+                'NG': 'Nigeria',
+                'ZA': 'South Africa',
+                'IN': 'India'
+            };
+            return countries[code] || code;
+        }
+        
+        function editPersonalInfo() {
+            openModal('editProfileModal');
+        }
+        
+        async function saveProfile(event) {
+            event.preventDefault();
+            
+            const data = {
+                fullName: document.getElementById('edit-fullname').value,
+                phoneNumber: document.getElementById('edit-phone').value,
+                country: document.getElementById('edit-country').value
+            };
+            
+            showLoading(true);
+            
+            try {
+                const response = await fetch(`${CONFIG.API_URL}/users/profile`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (!response.ok) throw new Error('Failed to update profile');
+                
+                showToast('Profile updated successfully', 'success');
+                closeModal('editProfileModal');
+                await loadProfile();
+                
+            } catch (error) {
+                showToast(error.message, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        function changePassword() {
+            openModal('changePasswordModal');
+        }
+        
+        async function updatePassword(event) {
+            event.preventDefault();
+            
+            const current = document.getElementById('current-password').value;
+            const newPass = document.getElementById('new-password').value;
+            const confirm = document.getElementById('confirm-password').value;
+            
+            if (newPass !== confirm) {
+                showToast('Passwords do not match', 'error');
+                return;
+            }
+            
+            if (newPass.length < 6) {
+                showToast('Password must be at least 6 characters', 'error');
+                return;
+            }
+            
+            showLoading(true);
+            
+            try {
+                const response = await fetch(`${CONFIG.API_URL}/users/change-password`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({
+                        currentPassword: current,
+                        newPassword: newPass
+                    })
+                });
+                
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.message || 'Failed to update password');
+                }
+                
+                showToast('Password updated successfully', 'success');
+                closeModal('changePasswordModal');
+                document.getElementById('changePasswordModal').querySelector('form').reset();
+                
+            } catch (error) {
+                showToast(error.message, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        function toggle2FA() {
+            const enabled = document.getElementById('twofa-toggle').checked;
+            showToast(`2FA ${enabled ? 'enabled' : 'disabled'} (demo)`, 'info');
+        }
+        
+        function startVerification() {
+            showToast('Verification process coming soon!', 'info');
+        }
+        
+        function removeDevice(btn) {
+            btn.closest('.device-item').remove();
+            showToast('Device removed', 'success');
+        }
+        
+        function deleteAccount() {
+            if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+                showToast('Account deletion coming soon', 'info');
+            }
+        }
+    </script>
+</body>
+</html>

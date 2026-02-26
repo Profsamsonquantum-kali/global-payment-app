@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unipay Pro - Send Money Worldwide</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .main-card {
+            background: white;
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .steps::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #e2e8f0;
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+
+        .step {
+            position: relative;
+            z-index: 2;
+            background: white;
+            padding: 0 20px;
+            text-align: center;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background: #e2e8f0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-weight: 700;
+            color: #718096;
+        }
+
+        .step.active .step-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .step-title {
+            font-size: 14px;
+            color: #718096;
+        }
+
+        .step.active .step-title {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .step-content {
+            display: none;
+        }
+
+        .step-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            color: #2d3748;
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #4a5568;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .country-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .exchange-rate-box {
+            background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+            border: 2px dashed #667eea;
+        }
+
+        .rate {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+            margin: 10px 0;
+        }
+
+        .amount-input {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .currency-badge {
+            background: #edf2f7;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .amount-input input {
+            flex: 1;
+        }
+
+        .target-amount {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .target-amount .label {
+            color: #718096;
+            margin-bottom: 5px;
+        }
+
+        .target-amount .value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #48bb78;
+        }
+
+        .methods-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .method-card {
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .method-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+        }
+
+        .method-card.active {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .method-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .method-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .method-provider {
+            font-size: 12px;
+            color: #718096;
+        }
+
+        .fee-breakdown {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .fee-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px dashed #e2e8f0;
+        }
+
+        .fee-item.total {
+            font-weight: 700;
+            border-bottom: none;
+            font-size: 18px;
+            color: #2d3748;
+        }
+
+        .delivery-info {
+            background: #f0fff4;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+            color: #48bb78;
+            font-weight: 600;
+        }
+
+        .recipient-form {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        .country-specific {
+            display: none;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn-primary, .btn-secondary {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #4a5568;
+            border: 2px solid #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.9);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .loading.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #e2e8f0;
+            border-top: 5px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1001;
+            animation: slideIn 0.3s ease;
+        }
+
+        .toast.success {
+            background: #48bb78;
+            color: white;
+        }
+
+        .toast.error {
+            background: #f56565;
+            color: white;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: rgba(255,255,255,0.8);
+            font-size: 14px;
+        }
+
+        .footer a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .main-card {
+                padding: 20px;
+            }
+            
+            .country-selector {
+                grid-template-columns: 1fr;
+            }
+            
+            .recipient-form {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-group.full-width {
+                grid-column: span 1;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🌍 Unipay Pro Global</div>
+            <button class="back-btn" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </button>
+        </div>
+        
+        <div class="main-card">
+            <div class="steps">
+                <div class="step active" id="step1-indicator">
+                    <div class="step-number">1</div>
+                    <div class="step-title">Select Countries</div>
+                </div>
+                <div class="step" id="step2-indicator">
+                    <div class="step-number">2</div>
+                    <div class="step-title">Enter Amount</div>
+                </div>
+                <div class="step" id="step3-indicator">
+                    <div class="step-number">3</div>
+                    <div class="step-title">Choose Method</div>
+                </div>
+                <div class="step" id="step4-indicator">
+                    <div class="step-number">4</div>
+                    <div class="step-title">Recipient Details</div>
+                </div>
+                <div class="step" id="step5-indicator">
+                    <div class="step-number">5</div>
+                    <div class="step-title">Confirm & Send</div>
+                </div>
+            </div>
+            
+            <!-- Step 1: Select Countries -->
+            <div class="step-content active" id="step1">
+                <h2>Where are you sending money?</h2>
+                
+                <div class="country-selector">
+                    <div class="form-group">
+                        <label>From Country</label>
+                        <select id="fromCountry" onchange="updateFromCountry()">
+                            <option value="">Select sending country</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>To Country</label>
+                        <select id="toCountry" onchange="updateToCountry()">
+                            <option value="">Select receiving country</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="exchange-rate-box" id="exchangeRateBox" style="display: none;">
+                    <div>Current Exchange Rate</div>
+                    <div class="rate" id="exchangeRate">1 USD = 150 KES</div>
+                    <div class="timestamp" id="rateTimestamp">Real-time rate</div>
+                </div>
+                
+                <button class="btn-primary" onclick="nextStep(2)" id="continueStep1" disabled>Continue</button>
+            </div>
+            
+            <!-- Step 2: Enter Amount -->
+            <div class="step-content" id="step2">
+                <h2>How much would you like to send?</h2>
+                
+                <div class="form-group">
+                    <label>You send</label>
+                    <div class="amount-input">
+                        <span class="currency-badge" id="fromCurrency">USD</span>
+                        <input type="number" id="amount" placeholder="0.00" min="1" step="0.01" oninput="calculateTarget()">
+                    </div>
+                </div>
+                
+                <div class="target-amount">
+                    <div class="label">Recipient gets</div>
+                    <div class="value" id="targetAmount">0.00</div>
+                    <div class="currency" id="toCurrency">KES</div>
+                </div>
+                
+                <div class="fee-breakdown" id="feeBreakdown" style="display: none;">
+                    <h3>Fee Breakdown</h3>
+                    <div class="fee-item">
+                        <span>Transfer Fee</span>
+                        <span id="feeAmount">$0.00</span>
+                    </div>
+                    <div class="fee-item">
+                        <span>Exchange Rate Fee</span>
+                        <span id="exchangeFee">$0.00</span>
+                    </div>
+                    <div class="fee-item total">
+                        <span>Total Fees</span>
+                        <span id="totalFees">$0.00</span>
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="prevStep(1)">Back</button>
+                    <button class="btn-primary" onclick="nextStep(3)" id="continueStep2" disabled>Continue</button>
+                </div>
+            </div>
+            
+            <!-- Step 3: Choose Payment Method -->
+            <div class="step-content" id="step3">
+                <h2>How would you like to send?</h2>
+                
+                <div id="paymentMethods" class="methods-grid">
+                    <!-- Dynamically populated -->
+                </div>
+                
+                <div class="delivery-info" id="deliveryInfo" style="display: none;">
+                    <i class="fas fa-clock"></i> Estimated delivery: <span id="estimatedTime">1-3 business days</span>
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="prevStep(2)">Back</button>
+                    <button class="btn-primary" onclick="nextStep(4)" id="continueStep3" disabled>Continue</button>
+                </div>
+            </div>
+            
+            <!-- Step 4: Recipient Details -->
+            <div class="step-content" id="step4">
+                <h2>Recipient Information</h2>
+                
+                <div class="recipient-form" id="recipientForm">
+                    <div class="form-group full-width">
+                        <label>Full Name</label>
+                        <input type="text" id="recipientName" placeholder="Full name of recipient">
+                    </div>
+                    
+                    <!-- Bank Fields (Common) -->
+                    <div class="form-group bank-field">
+                        <label>Bank Name</label>
+                        <input type="text" id="bankName" placeholder="e.g., Chase, Equity, Standard Chartered">
+                    </div>
+                    
+                    <div class="form-group bank-field">
+                        <label>Account Number</label>
+                        <input type="text" id="accountNumber" placeholder="Account number">
+                    </div>
+                    
+                    <!-- US Specific -->
+                    <div class="form-group country-specific US">
+                        <label>Routing Number (ABA)</label>
+                        <input type="text" id="routingNumber" placeholder="9-digit routing number">
+                    </div>
+                    
+                    <!-- UK Specific -->
+                    <div class="form-group country-specific GB">
+                        <label>Sort Code</label>
+                        <input type="text" id="sortCode" placeholder="00-00-00">
+                    </div>
+                    
+                    <!-- Europe Specific -->
+                    <div class="form-group country-specific DE FR IT ES NL">
+                        <label>IBAN</label>
+                        <input type="text" id="iban" placeholder="International Bank Account Number">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>SWIFT/BIC (Optional)</label>
+                        <input type="text" id="swiftCode" placeholder="SWIFT code">
+                    </div>
+                    
+                    <!-- Mobile Money Fields -->
+                    <div class="form-group country-specific KE TZ UG GH">
+                        <label>Mobile Money Number</label>
+                        <input type="tel" id="mobileNumber" placeholder="e.g., 254712345678">
+                    </div>
+                    
+                    <div class="form-group country-specific KE TZ UG GH">
+                        <label>Mobile Network</label>
+                        <select id="mobileProvider">
+                            <option value="">Select network</option>
+                            <option value="safaricom">Safaricom (M-Pesa)</option>
+                            <option value="airtel">Airtel Money</option>
+                            <option value="telkom">Telkom</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Email for PayPal/Wise -->
+                    <div class="form-group full-width">
+                        <label>Recipient Email (Optional)</label>
+                        <input type="email" id="recipientEmail" placeholder="Email for digital wallet transfers">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>What's this for? (Optional)</label>
+                    <input type="text" id="description" placeholder="e.g., Family support, Business payment">
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="prevStep(3)">Back</button>
+                    <button class="btn-primary" onclick="nextStep(5)" id="continueStep4" disabled>Continue</button>
+                </div>
+            </div>
+            
+            <!-- Step 5: Confirm & Send -->
+            <div class="step-content" id="step5">
+                <h2>Review and Confirm</h2>
+                
+                <div style="background: #f7fafc; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                    <h3>Transfer Summary</h3>
+                    
+                    <table style="width: 100%; margin-top: 15px;">
+                        <tr>
+                            <td style="padding: 10px 0; color: #718096;">You send:</td>
+                            <td style="padding: 10px 0; font-weight: 600; text-align: right;" id="summarySend">$100.00 USD</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0; color: #718096;">Recipient gets:</td>
+                            <td style="padding: 10px 0; font-weight: 600; text-align: right; color: #48bb78;" id="summaryReceive">15,000 KES</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0; color: #718096;">Exchange rate:</td>
+                            <td style="padding: 10px 0; text-align: right;" id="summaryRate">1 USD = 150 KES</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0; color: #718096;">Transfer fee:</td>
+                            <td style="padding: 10px 0; text-align: right;" id="summaryFee">$2.50 USD</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0; color: #718096;">Total deducted:</td>
+                            <td style="padding: 10px 0; font-weight: 700; text-align: right;" id="summaryTotal">$102.50 USD</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0; color: #718096;">Payment method:</td>
+                            <td style="padding: 10px 0; text-align: right;" id="summaryMethod">Bank Transfer</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0; color: #718096;">Estimated delivery:</td>
+                            <td style="padding: 10px 0; text-align: right;" id="summaryDelivery">1-3 business days</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0; color: #718096;">Recipient:</td>
+                            <td style="padding: 10px 0; text-align: right;" id="summaryRecipient">John Doe</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div class="form-group">
+                    <label class="checkbox">
+                        <input type="checkbox" id="confirmTerms" onchange="toggleSendButton()">
+                        <span>I confirm that the recipient details are correct and I understand the transfer terms</span>
+                    </label>
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="prevStep(4)">Back</button>
+                    <button class="btn-primary" onclick="sendMoney()" id="sendButton" disabled>
+                        <i class="fas fa-lock"></i> Send Money Now
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>© 2026 Unipay Pro. All rights reserved.</p>
+            <p>Developed by <a href="mailto:samsonwsimiyu@gmail.com">Samson W Simiyu</a></p>
+            <p>Contact: <a href="mailto:samsonwsimiyu@gmail.com">samsonwsimiyu@gmail.com</a></p>
+        </div>
+    </div>
+    
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <div>Processing your payment...</div>
+    </div>
+    
+    <div id="toast"></div>
+    
+    <script>
+        // ============================================
+        // GLOBAL VARIABLES
+        // ============================================
+        const API_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:5000/api'
+            : 'https://unipay-pro-api.onrender.com/api';
+            
+        let countries = [];
+        let selectedFromCountry = null;
+        let selectedToCountry = null;
+        let selectedMethod = null;
+        let exchangeRate = 1;
+        let fees = null;
+        let currentStep = 1;
+        
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadCountries();
+            await loadUserBalance();
+        });
+        
+        // ============================================
+        // LOAD COUNTRIES
+        // ============================================
+        async function loadCountries() {
+            try {
+                showLoading(true);
+                const response = await fetch(`${API_URL}/global/countries`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                
+                const data = await response.json();
+                countries = data.countries;
+                
+                populateCountrySelectors();
+            } catch (error) {
+                showToast('Error loading countries', 'error');
+                console.error(error);
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        // ============================================
+        // LOAD USER BALANCE
+        // ============================================
+        async function loadUserBalance() {
+            try {
+                const response = await fetch(`${API_URL}/payments/balance`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                
+                const data = await response.json();
+                console.log('User balance:', data);
+            } catch (error) {
+                console.error('Error loading balance:', error);
+            }
+        }
+        
+        // ============================================
+        // POPULATE COUNTRY SELECTORS
+        // ============================================
+        function populateCountrySelectors() {
+            const fromSelect = document.getElementById('fromCountry');
+            const toSelect = document.getElementById('toCountry');
+            
+            let options = '<option value="">Select Country</option>';
+            
+            countries.forEach(country => {
+                options += `<option value="${country.code}">${country.name} (${country.currency})</option>`;
+            });
+            
+            fromSelect.innerHTML = options;
+            toSelect.innerHTML = options;
+        }
+        
+        // ============================================
+        // COUNTRY SELECTION HANDLERS
+        // ============================================
+        async function updateFromCountry() {
+            const select = document.getElementById('fromCountry');
+            selectedFromCountry = countries.find(c => c.code === select.value);
+            
+            document.getElementById('fromCurrency').textContent = selectedFromCountry?.currency || 'USD';
+            
+            await updateExchangeRate();
+            checkStep1Complete();
+        }
+        
+        async function updateToCountry() {
+            const select = document.getElementById('toCountry');
+            selectedToCountry = countries.find(c => c.code === select.value);
+            
+            document.getElementById('toCurrency').textContent = selectedToCountry?.currency || 'KES';
+            
+            await updateExchangeRate();
+            await loadPaymentMethods();
+            checkStep1Complete();
+        }
+        
+        async function updateExchangeRate() {
+            if (!selectedFromCountry || !selectedToCountry) return;
+            
+            try {
+                const response = await fetch(
+                    `${API_URL}/global/exchange-rate?from=${selectedFromCountry.currency}&to=${selectedToCountry.currency}`,
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        }
+                    }
+                );
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    exchangeRate = data.rate;
+                    document.getElementById('exchangeRateBox').style.display = 'block';
+                    document.getElementById('exchangeRate').textContent = 
+                        `1 ${selectedFromCountry.currency} = ${exchangeRate.toFixed(4)} ${selectedToCountry.currency}`;
+                    document.getElementById('rateTimestamp').textContent = 
+                        `Updated: ${new Date(data.timestamp).toLocaleTimeString()}`;
+                    
+                    calculateTarget();
+                }
+            } catch (error) {
+                console.error('Exchange rate error:', error);
+            }
+        }
+        
+        async function loadPaymentMethods() {
+            if (!selectedToCountry) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/global/payment-methods/${selectedToCountry.code}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayPaymentMethods(data.methods);
+                }
+            } catch (error) {
+                console.error('Error loading payment methods:', error);
+            }
+        }
+        
+        function displayPaymentMethods(methods) {
+            const container = document.getElementById('paymentMethods');
+            
+            let html = '';
+            
+            methods.forEach(method => {
+                const icons = {
+                    'mpesa': '📱',
+                    'card': '💳',
+                    'bank': '🏦',
+                    'paypal': '🅿️',
+                    'paystack': '🇳🇬',
+                    'razorpay': '🇮🇳',
+                    'mercadopago': '🇧🇷',
+                    'stripe': '💳',
+                    'wise': '🌍',
+                    'gcash': '📲',
+                    'pix': '⚡'
+                };
+                
+                html += `
+                    <div class="method-card" onclick="selectMethod('${method.id}')" id="method-${method.id}">
+                        <div class="method-icon">${icons[method.id] || '💰'}</div>
+                        <div class="method-name">${method.name}</div>
+                        <div class="method-provider">${method.provider}</div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        function selectMethod(methodId) {
+            selectedMethod = methodId;
+            
+            document.querySelectorAll('.method-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            
+            document.getElementById(`method-${methodId}`).classList.add('active');
+            
+            // Show delivery info
+            document.getElementById('deliveryInfo').style.display = 'block';
+            
+            // Update estimated time based on method
+            const estimates = {
+                'mpesa': '5-10 minutes',
+                'paystack': '30 minutes - 2 hours',
+                'razorpay': '1-3 hours',
+                'mercadopago': 'Instant - 1 hour',
+                'stripe': '1-2 business days',
+                'paypal': '1-3 business days',
+                'wise': '1-2 business days',
+                'bank': '2-5 business days',
+                'gcash': '10-30 minutes',
+                'pix': 'Instant'
+            };
+            
+            document.getElementById('estimatedTime').textContent = estimates[methodId] || '1-3 business days';
+            
+            checkStep3Complete();
+            calculateFees();
+        }
+        
+        function checkStep1Complete() {
+            const continueBtn = document.getElementById('continueStep1');
+            continueBtn.disabled = !(selectedFromCountry && selectedToCountry);
+        }
+        
+        function checkStep2Complete() {
+            const amount = parseFloat(document.getElementById('amount').value);
+            const continueBtn = document.getElementById('continueStep2');
+            continueBtn.disabled = !(amount && amount >= 1);
+        }
+        
+        function checkStep3Complete() {
+            const continueBtn = document.getElementById('continueStep3');
+            continueBtn.disabled = !selectedMethod;
+        }
+        
+        function checkStep4Complete() {
+            const name = document.getElementById('recipientName').value;
+            const continueBtn = document.getElementById('continueStep4');
+            
+            // Basic validation
+            const isValid = name && name.length > 0;
+            continueBtn.disabled = !isValid;
+        }
+        
+        // ============================================
+        // CALCULATIONS
+        // ============================================
+        function calculateTarget() {
+            const amount = parseFloat(document.getElementById('amount').value) || 0;
+            const targetAmount = amount * exchangeRate;
+            
+            document.getElementById('targetAmount').textContent = targetAmount.toFixed(2);
+            
+            if (amount > 0) {
+                calculateFees();
+            }
+            
+            checkStep2Complete();
+        }
+        
+        async function calculateFees() {
+            const amount = parseFloat(document.getElementById('amount').value);
+            
+            if (!amount || !selectedFromCountry || !selectedToCountry || !selectedMethod) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/global/calculate-fees`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({
+                        amount,
+                        fromCountry: selectedFromCountry.code,
+                        toCountry: selectedToCountry.code,
+                        method: selectedMethod
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    fees = data.fees;
+                    displayFees(fees);
+                }
+            } catch (error) {
+                console.error('Fee calculation error:', error);
+            }
+        }
+        
+        function displayFees(fees) {
+            document.getElementById('feeBreakdown').style.display = 'block';
+            
+            const fromCurrency = selectedFromCountry.currency;
+            
+            document.getElementById('feeAmount').textContent = 
+                `${fromCurrency} ${(fees.total * 0.7).toFixed(2)}`;
+            document.getElementById('exchangeFee').textContent = 
+                `${fromCurrency} ${(fees.total * 0.3).toFixed(2)}`;
+            document.getElementById('totalFees').textContent = 
+                `${fromCurrency} ${fees.total.toFixed(2)}`;
+        }
+        
+        // ============================================
+        // STEP NAVIGATION
+        // ============================================
+        function nextStep(step) {
+            // Update step indicators
+            document.querySelectorAll('.step').forEach((el, index) => {
+                if (index + 1 <= step) {
+                    el.classList.add('active');
+                } else {
+                    el.classList.remove('active');
+                }
+            });
+            
+            // Hide all step contents
+            document.querySelectorAll('.step-content').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // Show current step
+            document.getElementById(`step${step}`).classList.add('active');
+            currentStep = step;
+            
+            // Special handling for step 4
+            if (step === 4) {
+                updateRecipientFields();
+            }
+            
+            // Special handling for step 5
+            if (step === 5) {
+                updateSummary();
+            }
+        }
+        
+        function prevStep(step) {
+            nextStep(step);
+        }
+        
+        function updateRecipientFields() {
+            // Hide all country-specific fields
+            document.querySelectorAll('.country-specific').forEach(el => {
+                el.style.display = 'none';
+            });
+            
+            // Show fields for selected country
+            if (selectedToCountry) {
+                document.querySelectorAll(`.country-specific.${selectedToCountry.code}`).forEach(el => {
+                    el.style.display = 'block';
+                });
+            }
+            
+            // Show/hide bank fields based on method
+            const isBankMethod = ['bank', 'stripe', 'wise', 'paystack', 'razorpay'].includes(selectedMethod);
+            const isMobileMethod = ['mpesa', 'gcash'].includes(selectedMethod);
+            
+            document.querySelectorAll('.bank-field').forEach(el => {
+                el.style.display = isBankMethod ? 'block' : 'none';
+            });
+        }
+        
+        function updateSummary() {
+            const amount = parseFloat(document.getElementById('amount').value);
+            const targetAmount = amount * exchangeRate;
+            
+            document.getElementById('summarySend').textContent = 
+                `${amount.toFixed(2)} ${selectedFromCountry.currency}`;
+            document.getElementById('summaryReceive').textContent = 
+                `${targetAmount.toFixed(2)} ${selectedToCountry.currency}`;
+            document.getElementById('summaryRate').textContent = 
+                `1 ${selectedFromCountry.currency} = ${exchangeRate.toFixed(4)} ${selectedToCountry.currency}`;
+            
+            if (fees) {
+                document.getElementById('summaryFee').textContent = 
+                    `${selectedFromCountry.currency} ${fees.total.toFixed(2)}`;
+                document.getElementById('summaryTotal').textContent = 
+                    `${selectedFromCountry.currency} ${(amount + fees.total).toFixed(2)}`;
+            }
+            
+            // Get method name
+            const methodCard = document.querySelector('.method-card.active');
+            const methodName = methodCard ? methodCard.querySelector('.method-name').textContent : selectedMethod;
+            document.getElementById('summaryMethod').textContent = methodName;
+            
+            document.getElementById('summaryDelivery').textContent = 
+                document.getElementById('estimatedTime').textContent;
+            
+            document.getElementById('summaryRecipient').textContent = 
+                document.getElementById('recipientName').value || 'Not specified';
+        }
+        
+        function toggleSendButton() {
+            const termsChecked = document.getElementById('confirmTerms').checked;
+            document.getElementById('sendButton').disabled = !termsChecked;
+        }
+        
+        // ============================================
+        // SEND MONEY
+        // ============================================
+        async function sendMoney() {
+            const amount = parseFloat(document.getElementById('amount').value);
+            const recipientName = document.getElementById('recipientName').value;
+            const description = document.getElementById('description').value;
+            
+            // Build recipient details based on method
+            const recipientDetails = {
+                accountName: recipientName,
+                bankName: document.getElementById('bankName')?.value,
+                accountNumber: document.getElementById('accountNumber')?.value,
+                routingNumber: document.getElementById('routingNumber')?.value,
+                sortCode: document.getElementById('sortCode')?.value,
+                iban: document.getElementById('iban')?.value,
+                swiftCode: document.getElementById('swiftCode')?.value,
+                phoneNumber: document.getElementById('mobileNumber')?.value,
+                email: document.getElementById('recipientEmail')?.value
+            };
+            
+            const paymentData = {
+                amount,
+                fromCurrency: selectedFromCountry.currency,
+                toCurrency: selectedToCountry.currency,
+                fromCountry: selectedFromCountry.code,
+                toCountry: selectedToCountry.code,
+                recipientDetails,
+                paymentMethod: selectedMethod,
+                description: description || 'International transfer'
+            };
+            
+            showLoading(true);
+            
+            try {
+                const response = await fetch(`${API_URL}/global/send`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify(paymentData)
+                });
+                
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(result.message || 'Payment failed');
+                }
+                
+                showToast('✅ Money sent successfully!', 'success');
+                
+                // Show success with transaction details
+                setTimeout(() => {
+                    window.location.href = `track.html?id=${result.transactionId}`;
+                }, 2000);
+                
+            } catch (error) {
+                showToast(error.message, 'error');
+                console.error('Send error:', error);
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        // ============================================
+        // UTILITY FUNCTIONS
+        // ============================================
+        function showLoading(show) {
+            document.getElementById('loading').classList.toggle('active', show);
+        }
+        
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.innerHTML = `
+                <div class="toast ${type}">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                    ${message}
+                </div>
+            `;
+            
+            setTimeout(() => {
+                toast.innerHTML = '';
+            }, 3000);
+        }
+        
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+        
+        // Add input listeners
+        document.getElementById('amount').addEventListener('input', calculateTarget);
+        document.getElementById('recipientName').addEventListener('input', checkStep4Complete);
+        document.getElementById('confirmTerms').addEventListener('change', toggleSendButton);
+    </script>
+</body>
+</html>
